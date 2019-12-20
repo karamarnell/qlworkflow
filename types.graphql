@@ -1,4 +1,4 @@
-"""Details about the user and merchant authenticated in this request."""
+"""Details about the user and merchant authenticated in this request KARA."""
 type Viewer {
   """Unique identifier."""
   id: ID @deprecated(reason: "Use `user` for id instead.")
