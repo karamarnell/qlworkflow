@@ -1,0 +1,396 @@
+"""The status of a User."""
+enum UserStatus {
+  ACTIVE
+  DELETED
+  PASSIVE
+  PENDING
+  SUSPENDED
+}
+"""A boolean-like value that includes `UNKNOWN` in the case where the information isn't available."""
+enum BinRecordValue @legacyEnum(capitalize: true) {
+  NO
+  UNKNOWN
+  YES
+}
+"""A value used by Braintree client SDKs to determine what operations are supported through this GraphQL API."""
+enum ClientFeature @legacyEnum {
+  TOKENIZE_CREDIT_CARDS
+}
+"""A code identifying the card brand."""
+enum CreditCardBrandCode @legacyEnum {
+  AMERICAN_EXPRESS
+  DINERS
+  DISCOVER
+  INTERNATIONAL_MAESTRO
+  JCB
+  MASTERCARD
+  SOLO
+  UK_MAESTRO
+  UNION_PAY
+  UNKNOWN
+  VISA
+}
+"""Type of dispute."""
+enum DisputeType {
+  CHARGEBACK
+  """A [second challenge to a charge](https://articles.braintreepayments.com/risk-and-security/chargebacks-retrievals/overview#pre-arbitrations), in the case that you have won an initial chargeback."""
+  PRE_ARBITRATION
+  RETRIEVAL
+}
+"""The reason a customer opened a chargeback, pre-arbitration, or retrieval."""
+enum DisputeReason {
+  CANCELLED_RECURRING_TRANSACTION
+  CREDIT_NOT_PROCESSED
+  DUPLICATE
+  FRAUD
+  GENERAL
+  INVALID_ACCOUNT
+  NOT_RECOGNIZED
+  PRODUCT_NOT_RECEIVED
+  PRODUCT_UNSATISFACTORY
+  RETRIEVAL
+  TRANSACTION_AMOUNT_DIFFERS
+}
+"""The status of the dispute."""
+enum DisputeStatus {
+  ACCEPTED
+  DISPUTED
+  EXPIRED
+  LOST
+  OPEN
+  WON
+}
+"""The type of verification on an US bank account payment method. See our [ACH guide](https://articles.braintreepayments.com/guides/payment-methods/ach#verification-methods)."""
+enum UsBankAccountVerificationMethod {
+  """Verification conducted independently by the merchant, not through Braintree."""
+  INDEPENDENT_CHECK
+  """Verification by micro-deposits transferred to the bank account, which the customer must then confirm. The most reliable method, but takes additional time."""
+  MICRO_TRANSFERS
+  """Verification via account information. Will complete the verification process immediately, but is not supported by all banks."""
+  NETWORK_CHECK
+  """Verification at the point of tokenization. Requires integration with a third-party provider. Because this requires a different tokenization flow, this method of verification is only supported for vaulting tokenized US bank account logins, and is not supported when re-verifying a US bank account payment method."""
+  TOKENIZED_CHECK
+}
+"""A value identifying the third-party origin from which a customer provided their payment method."""
+enum PaymentMethodOriginType {
+  APPLE_PAY
+  GOOGLE_PAY
+  MASTERPASS
+  NETWORK_TOKEN
+  SAMSUNG_PAY
+  VISA_CHECKOUT
+}
+"""A value identifying the type of payment method used for a transaction. For certain payment methods such as credit cards, this value also encodes the origin from which a customer provided that payment method."""
+enum PaymentMethodSnapshotSearchType {
+  CREDIT_CARD
+  CREDIT_CARD_VIA_APPLE_PAY
+  CREDIT_CARD_VIA_GOOGLE_PAY
+  CREDIT_CARD_VIA_MASTERPASS
+  CREDIT_CARD_VIA_NETWORK_TOKEN
+  CREDIT_CARD_VIA_SAMSUNG_PAY
+  CREDIT_CARD_VIA_VISA_CHECKOUT
+  PAYPAL
+  US_BANK_ACCOUNT
+  VENMO_ACCOUNT
+}
+"""The client configuration environment being used."""
+enum ClientConfigurationEnvironment @legacyEnum {
+  DEVELOPMENT
+  PRODUCTION
+  QA
+  SANDBOX
+  TEST
+}
+"""The environment being used for Apple Pay."""
+enum ApplePayStatus @legacyEnum {
+  MOCK
+  OFF
+  PRODUCTION
+}
+"""The environment being used for Google Pay."""
+enum GooglePayEnvironment @legacyEnum {
+  PRODUCTION
+  SANDBOX
+}
+"""The environment being used for Pay with Venmo."""
+enum VenmoEnvironment @legacyEnum {
+  PRODUCTION
+  SANDBOX
+}
+"""The environment being used for Samsung Pay."""
+enum SamsungPayEnvironment {
+  PRODUCTION
+  SANDBOX
+}
+"""The environment being used for PayPal."""
+enum PayPalEnvironment @legacyEnum {
+  CUSTOM
+  LIVE
+  OFFLINE
+}
+"""A list of challenges that are required by the current merchant to process a given credit card."""
+enum Challenge @legacyEnum {
+  CVV
+  POSTAL_CODE
+}
+"""The status of the transaction, indicating where it is in the [transaction lifecycle](https://articles.braintreepayments.com/get-started/transaction-lifecycle) and its success or failure. For further details on why any given status occurred, consult the corresponding `TransactionStatusEvent` in the transaction's `statusHistory`."""
+enum TransactionStatus {
+  """The transaction spent too much time in the `AUTHORIZED` status and was marked as expired. Expiration [time frames](https://developers.braintreepayments.com/reference/general/statuses#authorization-expired) differ by card type, transaction type, and, in some cases, merchant category."""
+  AUTHORIZATION_EXPIRED
+  """The processor authorized the transaction, putting your customer's funds on hold. Your customer may see a pending charge on his or her account. However, before the customer is actually charged and before you receive the funds, you must use the `captureTransaction` mutation. If you do not want to capture the transaction, you should use the `reverseTransaction` mutation to avoid a misuse of authorization fee."""
+  AUTHORIZED
+  """If a transaction remains in a status of `AUTHORIZING`, [contact Braintree Support for assistance](https://help.braintreepayments.com)."""
+  AUTHORIZING
+  """An error occurred when sending the transaction to the downstream processor. See the transaction's `statusHistory` for the exact error."""
+  FAILED
+  """The transaction was [rejected](https://articles.braintreepayments.com/control-panel/transactions/gateway-rejections) based on one or more settings or rules in your Braintree gateway. See the transaction's `statusHistory` to determine which resulted in the decline."""
+  GATEWAY_REJECTED
+  """The processor declined the transaction while attempting to authorize it. See the transaction's `statusHistory` to determine what reason the processor gave for the decline."""
+  PROCESSOR_DECLINED
+  """The transaction has been settled, meaning your customer has been charged and the process of disbursing the funds to your bank account will begin."""
+  SETTLED
+  SETTLEMENT_CONFIRMED @deprecated(reason: "No longer applicable to any supported payment method types.")
+  """The processor declined the transaction while attempting to capture it. See the transaction's `statusHistory` to detemine why it was not settled. This status is rare, and only certain types of transactions can be affected."""
+  SETTLEMENT_DECLINED
+  """The transaction has not yet fully settled. This status is rare, and will generally resolve to a status of `SETTLED`. Only certain types of transactions can be affected."""
+  SETTLEMENT_PENDING
+  """The transaction is in the process of being settled. This is a transitory state, and will resolve to a status of `SETTLED`."""
+  SETTLING
+  """The transaction has been successfully captured, and will be included in the next settlement batch, at which time it will become settled."""
+  SUBMITTED_FOR_SETTLEMENT
+  """The transaction was voided, meaning it is no longer authorized, your customer's funds are no longer on hold, and you cannot use the `captureTransaction` mutation on this transaction."""
+  VOIDED
+}
+"""The risk decision provides further context on how a transaction was scored for risk by Braintree."""
+enum RiskDecision {
+  APPROVE
+  DECLINE
+  NOT_EVALUATED
+  REVIEW
+}
+"""The third-party provider used to generate the risk decision."""
+enum FraudServiceProvider {
+  FRAUD_PROTECTION
+  KOUNT
+}
+"""Possible reasons why a transaction was rejected by the gateway."""
+enum GatewayRejectionReason {
+  APPLICATION_INCOMPLETE
+  AVS
+  AVS_AND_CVV
+  CVV
+  DUPLICATE
+  FRAUD
+  THREE_D_SECURE
+  TOKEN_ISSUANCE
+}
+"""Response codes from the processing bank's Address Verification System (AVS) and CVV verification."""
+enum AvsCvvResponseCode {
+  BYPASS
+  DOES_NOT_MATCH
+  ISSUER_DOES_NOT_PARTICIPATE
+  MATCHES
+  NOT_APPLICABLE
+  NOT_PROVIDED
+  NOT_VERIFIED
+  SYSTEM_ERROR
+}
+"""The origin of a request that created or changed a transaction."""
+enum TransactionSource {
+  API
+  CONTROL_PANEL
+  RECURRING
+  UNKNOWN
+}
+"""Possible usages for payment methods."""
+enum PaymentMethodUsage {
+  MULTI_USE
+  SINGLE_USE
+}
+"""The type of U.S. Bank Account."""
+enum UsBankAccountType {
+  CHECKING
+  SAVINGS
+}
+"""The ownership type of U.S. Bank Account."""
+enum UsBankAccountOwnershipType {
+  BUSINESS
+  PERSONAL
+}
+"""Whether the decline is likely to be temporary or persistent. Can be taken into consideration when determining whether to retry a declined charge."""
+enum ProcessorDeclineType {
+  """Hard declines are the result of an error or issue which can't be resolved immediately; the decline is not temporary and subsequent charges on the same payment method will likely not be successful."""
+  HARD
+  """Soft declines result from a temporary issue and can be retried; subsequent charges on the same payment method may be successful."""
+  SOFT
+}
+"""A two-letter code representing a U.S. state or territory."""
+enum UsStateCode {
+  AK
+  AL
+  AR
+  AS
+  AZ
+  CA
+  CO
+  CT
+  DC
+  DE
+  FL
+  GA
+  GU
+  HI
+  IA
+  ID
+  IL
+  IN
+  KS
+  KY
+  LA
+  MA
+  MD
+  ME
+  MI
+  MN
+  MO
+  MP
+  MS
+  MT
+  NC
+  ND
+  NE
+  NH
+  NJ
+  NM
+  NV
+  NY
+  OH
+  OK
+  OR
+  PA
+  PR
+  RI
+  SC
+  SD
+  TN
+  TX
+  UM
+  UT
+  VA
+  VI
+  VT
+  WA
+  WI
+  WV
+  WY
+}
+"""The type of recurring payment a transaction represents."""
+enum RecurringType {
+  FIRST
+  SUBSEQUENT
+  UNSCHEDULED
+}
+"""A NACHA standard entry class (SEC) code, which designates how an ACH transaction was authorized."""
+enum ACHStandardEntryClassCode {
+  """Corporate credit or debit."""
+  CCD
+  """Prearranged payment and deposit."""
+  PPD
+  """Telephone-initiated."""
+  TEL
+  """Internet-initiated/mobile."""
+  WEB
+}
+"""The status of the verification, indicating whether the payment method was successfully verified. Braintree recommends only vaulting payment methods with successful verifications."""
+enum VerificationStatus {
+  """Indicates the verification was unsuccessful because of an issue communicating with the processor."""
+  FAILED
+  """Indicates that the verification was unsuccessful because the payment method failed one or more fraud checks. In this case, the `gatewayRejectionReason` will indicate which fraud check failed."""
+  GATEWAY_REJECTED
+  """Indicates that the verification is pending."""
+  PENDING
+  """Indicates that the verification was unsuccessful based on the response from the processor."""
+  PROCESSOR_DECLINED
+  """Indicates that the verification was successful."""
+  VERIFIED
+  """Indicates that the verification is in the process of verifying."""
+  VERIFYING
+}
+"""The status of a micro-transfer amount confirmation."""
+enum ConfirmMicroTransferAmountsStatus {
+  AMOUNTS_DO_NOT_MATCH
+  CONFIRMED
+  TOO_MANY_ATTEMPTS
+}
+"""The type of object the legacyId represents when converting legacyId to ID."""
+enum LegacyIdType {
+  CUSTOMER
+  DISPUTE
+  PAYMENT_METHOD
+  REFUND
+  TRANSACTION
+  US_BANK_ACCOUNT_VERIFICATION
+  VERIFICATION
+}
+"""Indicates whether a transaction line item is a debit (sale) or credit (refund)."""
+enum TransactionLineItemType {
+  CREDIT
+  DEBIT
+}
+"""The customer authentication regulation environment that applies to the transaction, such as [PSD2](https://www.braintreepayments.com/blog/understanding-and-preparing-for-psd2-strong-customer-authentication/)."""
+enum CustomerAuthenticationRegulationEnvironment {
+  """EU Regulation [PSD2 Strong Customer Authentication](https://www.braintreepayments.com/blog/understanding-and-preparing-for-psd2-strong-customer-authentication/) applies to this transaction."""
+  PSDTWO
+  """Customer authentication regulation environment information is unavailable for this transaction at this time."""
+  UNAVAILABLE
+  """No customer authentication regulations apply to this transaction."""
+  UNREGULATED
+}
+"""The 3D Secure authentication status of the card."""
+enum ThreeDSecureAuthenticationStatus {
+  AUTHENTICATE_ATTEMPT_SUCCESSFUL
+  AUTHENTICATE_ERROR
+  AUTHENTICATE_FAILED
+  AUTHENTICATE_SIGNATURE_VERIFICATION_FAILED
+  AUTHENTICATE_SUCCESSFUL
+  AUTHENTICATE_UNABLE_TO_AUTHENTICATE
+  AUTHENTICATION_UNAVAILABLE
+  LOOKUP_BYPASSED
+  LOOKUP_ENROLLED
+  LOOKUP_ERROR
+  LOOKUP_NOT_ENROLLED
+  UNSUPPORTED_CARD
+}
+"""Indicates the shipping method chosen for the transaction in the 3D Secure lookup."""
+enum ThreeDSecureLookupShippingMethod {
+  ELECTRONIC_DELIVERY
+  GROUND
+  OVERNIGHT_EXPEDITED
+  PRIORITY
+  SAME_DAY
+  SHIP_TO_STORE
+}
+"""Indicates whether the card is enrolled in a 3D Secure program."""
+enum ThreeDSecureCardEnrolled {
+  """Authentication has been bypassed. This status will be returned if you set up bypass rules with CardinalCommerce, and they are triggered."""
+  BYPASS
+  """There was an error in determing whether the card is enrolled in a 3D Secure program."""
+  ERROR
+  """Card is not enrolled."""
+  NO
+  """The DS (directory server) or ACS (access control server) is not available for authentication at the time of the request."""
+  UNAVAILABLE
+  """Card is enrolled."""
+  YES
+}
+"""Indicates the current status of the 3D Secure authentication."""
+enum ThreeDSecureAuthenticationStatusIndicator {
+  AUTHENTICATION_REJECTED
+  CHALLENGE_REQUIRED_DECOUPLED_AUTHENTICATION
+  CHALLENGE_REQUIRED_FOR_AUTHENTICATION
+  FAILED_AUTHENTICATION
+  INFORMATIONAL_CHALLENGE_PREFERENCE_ACKNOWLEDGED
+  SUCCESSFUL_ATTEMPTS_TRANSACTION
+  SUCCESSFUL_AUTHENTICATION
+  UNABLE_TO_COMPLETE_AUTHENTICATION
+}
